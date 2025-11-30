@@ -17,7 +17,15 @@
       in
       {
         formatter = pkgs.nixfmt-tree;
-        devShells.default = pkgs.mkShell { };
+        devShells.default = pkgs.mkShell {
+          packages = with pkgs; [
+            cargo
+            rustc
+            uv
+            python315
+            swi-prolog
+          ];
+        };
       }
     );
 }
