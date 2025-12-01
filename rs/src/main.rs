@@ -1,37 +1,53 @@
-fn part_1_solution(input: &[&str]) -> (i32, i32) {
+fn get_password(input: &[&str]) -> (i32, i32) {
     input.iter().fold((50, 0), |(dial, acc), instruction| {
         let sign = if instruction.starts_with('L') { -1 } else { 1 };
         let steps = instruction[1..].parse::<i32>().unwrap();
         let delta = sign * steps;
         let dial = (dial + delta).rem_euclid(100);
 
-        (dial, if dial == 0 { acc + 1 } else { acc })
+        (dial, acc + (dial == 0) as i32)
     })
 }
 
-fn part_2_solution(input: &[&str]) -> (i32, i32) {
+fn get_password_v2(input: &[&str]) -> (i32, i32) {
     input.iter().fold((50, 0), |(dial, acc), instruction| {
         let sign = if instruction.starts_with('L') { -1 } else { 1 };
         let steps = instruction[1..].parse::<i32>().unwrap();
         let delta = sign * steps;
+        let times: i32;
+
+        if delta >= 0 {
+            times = (dial + delta) / 100;
+        } else {
+            let rev_dial = (100 - dial) % 100;
+            times = (rev_dial - delta) / 100;
+        }
+
         let dial = (dial + delta).rem_euclid(100);
 
-        (dial, acc)
+        (dial, acc + times)
     })
 }
 
 fn main() {
     let input = include_str!("../../input/day01.txt")
-        .lines()
+        .split_whitespace()
         .collect::<Vec<&str>>();
-    let part_1_result = part_1_solution(&input);
-    let part_2_result = part_2_solution(&input);
+    let password = get_password(&input);
+    let password_v2 = get_password_v2(&input);
 
-    println!("Part 1 result: {:?}", part_1_result);
-    println!("Part 2 result: {:?}", part_2_result);
+    println!("Password (Part 1): {:?}", password);
+    println!("Password (Part 2): {:?}", password_v2);
 }
 
 #[test]
 fn test_day01() {
-    assert_eq!(1, 1);
+    let example_input: &[&str] = &[
+        "L68", "L30", "R48", "L5", "R60", "L55", "L1", "L99", "R14", "L82",
+    ];
+    let example_password = get_password(example_input);
+    let example_password_v2 = get_password_v2(example_input);
+
+    assert_eq!(example_password, (32, 3));
+    assert_eq!(example_password_v2, (32, 6));
 }
