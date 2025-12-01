@@ -1,8 +1,12 @@
+// --- Day 1: Secret Entrance ---
+// https://adventofcode.com/2025/day/1
+
 pub fn get_password(input: &[&str]) -> (i32, i32) {
     input.iter().fold((50, 0), |(dial, acc), instruction| {
         let sign = if instruction.starts_with('L') { -1 } else { 1 };
         let steps = instruction[1..].parse::<i32>().unwrap();
         let delta = sign * steps;
+        // https://en.wikipedia.org/wiki/Euclidean_division
         let dial = (dial + delta).rem_euclid(100);
 
         (dial, acc + (dial == 0) as i32)
