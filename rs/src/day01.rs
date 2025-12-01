@@ -1,4 +1,4 @@
-fn get_password(input: &[&str]) -> (i32, i32) {
+pub fn get_password(input: &[&str]) -> (i32, i32) {
     input.iter().fold((50, 0), |(dial, acc), instruction| {
         let sign = if instruction.starts_with('L') { -1 } else { 1 };
         let steps = instruction[1..].parse::<i32>().unwrap();
@@ -9,7 +9,7 @@ fn get_password(input: &[&str]) -> (i32, i32) {
     })
 }
 
-fn get_password_v2(input: &[&str]) -> (i32, i32) {
+pub fn get_password_v2(input: &[&str]) -> (i32, i32) {
     input.iter().fold((50, 0), |(dial, acc), instruction| {
         let sign = if instruction.starts_with('L') { -1 } else { 1 };
         let steps = instruction[1..].parse::<i32>().unwrap();
@@ -29,25 +29,25 @@ fn get_password_v2(input: &[&str]) -> (i32, i32) {
     })
 }
 
-fn main() {
-    let input = include_str!("../../input/day01.txt")
-        .split_whitespace()
-        .collect::<Vec<&str>>();
-    let password = get_password(&input);
-    let password_v2 = get_password_v2(&input);
+#[cfg(test)]
+mod tests {
+    use pretty_assertions::assert_eq;
 
-    println!("Password (Part 1): {:?}", password);
-    println!("Password (Part 2): {:?}", password_v2);
-}
+    #[test]
+    fn test_solve_part_1() {
+        let input = include_str!("../../input/day01.txt")
+            .split_whitespace()
+            .collect::<Vec<&str>>();
+        let password = super::get_password(&input);
+        assert_eq!(password, (99, 995));
+    }
 
-#[test]
-fn test_day01() {
-    let example_input: &[&str] = &[
-        "L68", "L30", "R48", "L5", "R60", "L55", "L1", "L99", "R14", "L82",
-    ];
-    let example_password = get_password(example_input);
-    let example_password_v2 = get_password_v2(example_input);
-
-    assert_eq!(example_password, (32, 3));
-    assert_eq!(example_password_v2, (32, 6));
+    #[test]
+    fn test_solve_part_2() {
+        let input = include_str!("../../input/day01.txt")
+            .split_whitespace()
+            .collect::<Vec<&str>>();
+        let password = super::get_password_v2(&input);
+        assert_eq!(password, (99, 5847));
+    }
 }
