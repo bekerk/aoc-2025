@@ -1,6 +1,9 @@
 // --- Day 2: Gift Shop ---
 // https://adventofcode.com/2025/day/2
 
+use fancy_regex::Regex;
+use lazy_static::lazy_static;
+
 pub fn find_invalid_ids_in_ranges(
     ranges: Vec<(i64, i64)>,
     filter_impl: fn(i64) -> bool,
@@ -18,6 +21,7 @@ pub fn find_invalid_ids_in_range(range: (i64, i64), filter_impl: fn(i64) -> bool
 }
 
 pub fn is_invalid_id(id: i64) -> bool {
+    // well... we could also just work on strings there and avoid passing i64 around
     let len = id.ilog10() + 1;
     let left: i64;
     let right: i64;
@@ -43,6 +47,14 @@ pub fn is_invalid_id_v2(id: i64) -> bool {
     }
 
     false
+}
+
+lazy_static! {
+    pub static ref ID_PATTERN_REGEX: Regex = Regex::new(r"^(.+)\1+$").unwrap();
+}
+
+pub fn is_invalid_id_v2_with_regex(id: i64) -> bool {
+    ID_PATTERN_REGEX.is_match(&id.to_string()).unwrap_or(false)
 }
 
 #[cfg(test)]
@@ -117,6 +129,16 @@ mod tests {
     fn test_solve_part_2() {
         let input = file_to_vec("../input/day02.txt");
         let invalid_ids = super::find_invalid_ids_in_ranges(input, super::is_invalid_id_v2);
+        let sum = invalid_ids.iter().sum::<i64>();
+
+        assert_eq!(sum, 22617871034);
+    }
+
+    #[test]
+    fn test_solve_part_2_with_regex() {
+        let input = file_to_vec("../input/day02.txt");
+        let invalid_ids =
+            super::find_invalid_ids_in_ranges(input, super::is_invalid_id_v2_with_regex);
         let sum = invalid_ids.iter().sum::<i64>();
 
         assert_eq!(sum, 22617871034);
