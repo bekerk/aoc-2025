@@ -5,30 +5,33 @@ use fancy_regex::Regex;
 use lazy_static::lazy_static;
 
 pub fn find_invalid_ids_in_ranges(
-    ranges: Vec<(i64, i64)>,
-    filter_impl: fn(i64) -> bool,
-) -> Vec<i64> {
+    ranges: &[(usize, usize)],
+    filter_impl: fn(usize) -> bool,
+) -> Vec<usize> {
     ranges
         .iter()
         .flat_map(|range| find_invalid_ids_in_range(*range, filter_impl))
-        .collect::<Vec<i64>>()
+        .collect::<Vec<usize>>()
 }
 
-pub fn find_invalid_ids_in_range(range: (i64, i64), filter_impl: fn(i64) -> bool) -> Vec<i64> {
+pub fn find_invalid_ids_in_range(
+    range: (usize, usize),
+    filter_impl: fn(usize) -> bool,
+) -> Vec<usize> {
     (range.0..=range.1)
         .filter(|id| filter_impl(*id))
-        .collect::<Vec<i64>>()
+        .collect::<Vec<usize>>()
 }
 
-pub fn is_invalid_id(id: i64) -> bool {
-    // well... we could also just work on strings there and avoid passing i64 around
+pub fn is_invalid_id(id: usize) -> bool {
+    // well... we could also just work on strings there and avoid passing usize around
     let len = id.ilog10() + 1;
-    let left: i64;
-    let right: i64;
+    let left: usize;
+    let right: usize;
 
     if len.is_multiple_of(2) {
-        left = id / 10_i64.pow(len / 2);
-        right = id % 10_i64.pow(len / 2);
+        left = id / 10_usize.pow(len / 2);
+        right = id % 10_usize.pow(len / 2);
 
         return left == right;
     }
@@ -36,7 +39,7 @@ pub fn is_invalid_id(id: i64) -> bool {
     false
 }
 
-pub fn is_invalid_id_v2(id: i64) -> bool {
+pub fn is_invalid_id_v2(id: usize) -> bool {
     let str = id.to_string();
     let len = str.len();
 
@@ -53,7 +56,7 @@ lazy_static! {
     pub static ref ID_PATTERN_REGEX: Regex = Regex::new(r"^(.+)\1+$").unwrap();
 }
 
-pub fn is_invalid_id_v2_with_regex(id: i64) -> bool {
+pub fn is_invalid_id_v2_with_regex(id: usize) -> bool {
     ID_PATTERN_REGEX.is_match(&id.to_string()).unwrap_or(false)
 }
 
@@ -62,18 +65,18 @@ mod tests {
     use pretty_assertions::assert_eq;
     use std::fs;
 
-    fn file_to_vec(file: &str) -> Vec<(i64, i64)> {
+    fn file_to_vec(file: &str) -> Vec<(usize, usize)> {
         fs::read_to_string(file)
             .unwrap()
             .trim()
             .split(',')
             .map(|s| {
                 s.split('-')
-                    .map(|part| part.parse::<i64>().unwrap())
-                    .collect::<Vec<i64>>()
+                    .map(|part| part.parse::<usize>().unwrap())
+                    .collect::<Vec<usize>>()
             })
             .map(|v| (v[0], v[1]))
-            .collect::<Vec<(i64, i64)>>()
+            .collect::<Vec<(usize, usize)>>()
     }
 
     #[test]
@@ -119,8 +122,8 @@ mod tests {
     #[test]
     fn test_solve_part_1() {
         let input = file_to_vec("../input/day02.txt");
-        let invalid_ids = super::find_invalid_ids_in_ranges(input, super::is_invalid_id);
-        let sum = invalid_ids.iter().sum::<i64>();
+        let invalid_ids = super::find_invalid_ids_in_ranges(&input, super::is_invalid_id);
+        let sum = invalid_ids.iter().sum::<usize>();
 
         assert_eq!(sum, 15873079081);
     }
@@ -128,8 +131,8 @@ mod tests {
     #[test]
     fn test_solve_part_2() {
         let input = file_to_vec("../input/day02.txt");
-        let invalid_ids = super::find_invalid_ids_in_ranges(input, super::is_invalid_id_v2);
-        let sum = invalid_ids.iter().sum::<i64>();
+        let invalid_ids = super::find_invalid_ids_in_ranges(&input, super::is_invalid_id_v2);
+        let sum = invalid_ids.iter().sum::<usize>();
 
         assert_eq!(sum, 22617871034);
     }
@@ -138,8 +141,8 @@ mod tests {
     fn test_solve_part_2_with_regex() {
         let input = file_to_vec("../input/day02.txt");
         let invalid_ids =
-            super::find_invalid_ids_in_ranges(input, super::is_invalid_id_v2_with_regex);
-        let sum = invalid_ids.iter().sum::<i64>();
+            super::find_invalid_ids_in_ranges(&input, super::is_invalid_id_v2_with_regex);
+        let sum = invalid_ids.iter().sum::<usize>();
 
         assert_eq!(sum, 22617871034);
     }

@@ -2,13 +2,13 @@
 // https://adventofcode.com/2025/day/3
 
 pub fn maximum_possible_joltages(
-    series: &Vec<Vec<i64>>,
-    battery_func: fn(&Vec<i64>) -> i64,
-) -> i64 {
+    series: &[Vec<usize>],
+    battery_func: fn(&[usize]) -> usize,
+) -> usize {
     series.iter().map(|batteries| battery_func(batteries)).sum()
 }
 
-pub fn maximum_possible_joltage(batteries: &Vec<i64>) -> i64 {
+pub fn maximum_possible_joltage(batteries: &[usize]) -> usize {
     let len = batteries.len();
     let mut x = 0;
     let mut x_pos = 0;
@@ -32,7 +32,7 @@ pub fn maximum_possible_joltage(batteries: &Vec<i64>) -> i64 {
 
 use std::cmp::Reverse;
 
-pub fn maximum_possible_joltage_v2(batteries: &Vec<i64>) -> i64 {
+pub fn maximum_possible_joltage_v2(batteries: &[usize]) -> usize {
     let n = batteries.len();
     let mut result = 0;
     let mut start = 0;
@@ -60,17 +60,17 @@ mod tests {
     use pretty_assertions::assert_eq;
     use std::fs;
 
-    fn file_to_vec(file: &str) -> Vec<Vec<i64>> {
+    fn file_to_vec(file: &str) -> Vec<Vec<usize>> {
         fs::read_to_string(file)
             .unwrap()
             .trim()
             .split('\n')
             .map(|s| {
                 s.chars()
-                    .map(|c| c.to_digit(10).unwrap() as i64)
-                    .collect::<Vec<i64>>()
+                    .map(|c| c.to_digit(10).unwrap() as usize)
+                    .collect::<Vec<usize>>()
             })
-            .collect::<Vec<Vec<i64>>>()
+            .collect::<Vec<Vec<usize>>>()
     }
 
     #[test]
