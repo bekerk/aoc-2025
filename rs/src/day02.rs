@@ -26,17 +26,12 @@ pub fn find_invalid_ids_in_range(
 pub fn is_invalid_id(id: usize) -> bool {
     // well... we could also just work on strings there and avoid passing usize around
     let len = id.ilog10() + 1;
-    let left: usize;
-    let right: usize;
 
     if len.is_multiple_of(2) {
-        left = id / 10_usize.pow(len / 2);
-        right = id % 10_usize.pow(len / 2);
-
-        return left == right;
+        return id / 10_usize.pow(len / 2) == id % 10_usize.pow(len / 2);
     }
 
-    false
+    return false;
 }
 
 pub fn is_invalid_id_v2(id: usize) -> bool {
@@ -120,7 +115,7 @@ mod tests {
     }
 
     #[test]
-    fn test_solve_part_1() {
+    fn test_find_invalid_ids_in_ranges() {
         let input = file_to_vec("../input/day02.txt");
         let invalid_ids = super::find_invalid_ids_in_ranges(&input, super::is_invalid_id);
         let sum = invalid_ids.iter().sum::<usize>();
@@ -129,7 +124,7 @@ mod tests {
     }
 
     #[test]
-    fn test_solve_part_2() {
+    fn test_find_invalid_ids_in_ranges_v2() {
         let input = file_to_vec("../input/day02.txt");
         let invalid_ids = super::find_invalid_ids_in_ranges(&input, super::is_invalid_id_v2);
         let sum = invalid_ids.iter().sum::<usize>();

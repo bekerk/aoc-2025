@@ -13,8 +13,7 @@ const NEIGHBOURS: [(isize, isize); 8] = [
 ];
 
 pub fn get_safe_positions(grid: &[Vec<char>]) -> Vec<(usize, usize)> {
-    let max_x = grid[0].len();
-    let max_y = grid.len();
+    let (max_x, max_y) = (grid[0].len(), grid.len());
     let mut safe_positions: Vec<(usize, usize)> = Vec::new();
 
     for y in 0..max_y {
@@ -23,8 +22,9 @@ pub fn get_safe_positions(grid: &[Vec<char>]) -> Vec<(usize, usize)> {
                 continue;
             }
             let mut surrounding_rolls_count = 0;
-            for (dx, dy) in NEIGHBOURS {
-                if let (Some(nx), Some(ny)) = (x.checked_add_signed(dx), y.checked_add_signed(dy)) {
+            for (dx, dy) in &NEIGHBOURS {
+                if let (Some(nx), Some(ny)) = (x.checked_add_signed(*dx), y.checked_add_signed(*dy))
+                {
                     if nx < max_x && ny < max_y && grid[ny][nx] == '@' {
                         surrounding_rolls_count += 1;
                     }
@@ -45,15 +45,12 @@ pub fn count_total_rolls_that_can_be_removed(grid: &[Vec<char>]) -> usize {
 
     loop {
         let safe_positions = get_safe_positions(&grid);
-
         if safe_positions.is_empty() {
             break;
         }
-
         total_rolls += safe_positions.len();
-
-        for (x, y) in safe_positions {
-            grid[y][x] = '.';
+        for (x, y) in &safe_positions {
+            grid[*y][*x] = '.';
         }
     }
 

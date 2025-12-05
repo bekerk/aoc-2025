@@ -10,9 +10,7 @@ pub fn maximum_possible_joltages(
 
 pub fn maximum_possible_joltage(batteries: &[usize]) -> usize {
     let len = batteries.len();
-    let mut x = 0;
-    let mut x_pos = 0;
-    let mut y = 0;
+    let (mut x, mut x_pos, mut y) = (0, 0, 0);
 
     for i in 0..len - 1 {
         if batteries[i] > x {
@@ -34,8 +32,7 @@ use std::cmp::Reverse;
 
 pub fn maximum_possible_joltage_v2(batteries: &[usize]) -> usize {
     let n = batteries.len();
-    let mut result = 0;
-    let mut start = 0;
+    let (mut result, mut start) = (0, 0);
 
     for i in 0..12 {
         let remaining = 12 - i - 1;
@@ -114,14 +111,14 @@ mod tests {
     }
 
     #[test]
-    fn test_solve_part_1() {
+    fn test_maximum_possible_joltages() {
         let input = file_to_vec("../input/day03.txt");
         let joltage = super::maximum_possible_joltages(&input, super::maximum_possible_joltage);
         assert_eq!(joltage, 17443);
     }
 
     #[test]
-    fn test_solve_part_2() {
+    fn test_maximum_possible_joltages_v2() {
         let input = file_to_vec("../input/day03.txt");
         let joltage = super::maximum_possible_joltages(&input, super::maximum_possible_joltage_v2);
         assert_eq!(joltage, 172167155440541);

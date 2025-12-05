@@ -47,14 +47,14 @@ mod tests {
     }
 
     #[test]
-    fn test_solve_part_1() {
+    fn test_get_password() {
         let input = file_to_vec("../input/day01.txt");
         let password = super::get_password(&input);
         assert_eq!(password, (99, 995));
     }
 
     #[test]
-    fn test_solve_part_2() {
+    fn test_get_password_v2() {
         let input = file_to_vec("../input/day01.txt");
         let password = super::get_password_v2(&input);
         assert_eq!(password, (99, 5847));
