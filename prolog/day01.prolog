@@ -19,11 +19,6 @@ chars_to_instructions(['R' | Rest], Turn) :-
     string_chars(String, Rest),
     atom_number(String, Turn).
 
-read_file_to_string(Path, String) :-
-    open(Path, read, Stream),
-    read_string(Stream, _, String),
-    close(Stream).
-
 % --- part 1: get password ---
 
 get_password(Instructions, Dial, Acc) :-
@@ -72,5 +67,5 @@ run(Input) :-
     format("Day 1 Part 2: ~w~n", [Part2]).
 
 run() :-
-    read_file_to_string("../input/day01.txt", Input),
+    read_file_to_string("../input/day01.txt", Input, []),
     run(Input).

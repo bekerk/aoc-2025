@@ -1,0 +1,40 @@
+#!/usr/bin/env swipl
+
+parse_range(Token, Range) :-
+    split_string(Token, "-", "", [StartStr, EndStr]),
+    number_string(Start, StartStr),
+    number_string(End, EndStr),
+    numlist(Start, End, Range).
+
+even_digit_count(N) :-
+    number_codes(N, Codes),
+    length(Codes, Len),
+    Len mod 2 =:= 0.
+
+invalid_id(N) :-
+    number_string(N, Str),
+    string_length(Str, Len),
+    Half is Len // 2,
+    sub_string(Str, 0, Half, Half, Left),
+    sub_string(Str, Half, Half, 0, Right),
+    Left == Right.
+
+% --- part 1: sum invalid IDs in range ---
+
+sum_invalid_in_range(Token, Sum) :-
+    parse_range(Token, Range),
+    include(even_digit_count, Range, EvenDigitNums),
+    include(invalid_id, EvenDigitNums, InvalidIds),
+    sum_list(InvalidIds, Sum).
+
+% --- end part 1 ---
+
+run(Input) :-
+    split_string(Input, ",", "", Tokens),
+    maplist(sum_invalid_in_range, Tokens, Sums),
+    sum_list(Sums, Total),
+    format("Day 2 Part 1: ~w~n", [Total]).
+
+run :-
+    read_file_to_string("../input/day02.txt", Input, []),
+    run(Input).
