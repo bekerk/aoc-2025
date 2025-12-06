@@ -4,25 +4,20 @@
 use std::iter::zip;
 
 pub fn flip_grid<T: Clone>(grid: &[Vec<T>]) -> Vec<Vec<T>> {
-    let mut result = Vec::new();
     let num_cols = grid.iter().map(|row| row.len()).max().unwrap_or(0);
-
-    for col in 0..num_cols {
-        let mut stack = Vec::new();
-        for item in grid.iter() {
-            if col < item.len() {
-                stack.push(item[col].clone());
-            }
-        }
-        result.push(stack);
-    }
-
-    result
+    (0..num_cols)
+        .map(|col| {
+            grid.iter()
+                .filter_map(|row| row.get(col))
+                .cloned()
+                .collect()
+        })
+        .collect()
 }
 
-pub fn calculate_value(values: &[Vec<usize>], ops: &[String]) -> usize {
+pub fn calculate_value(values: &[Vec<usize>], ops: &[&str]) -> usize {
     zip(values, ops)
-        .map(|(values, op)| match op.as_str() {
+        .map(|(values, op)| match *op {
             "*" => values.iter().product(),
             "+" => values.iter().sum(),
             _ => 0,
@@ -68,18 +63,16 @@ pub fn calculate_work_sheet(work_sheet: &[Vec<String>]) -> usize {
 
     let values = flipped_work_sheet
         .iter()
-        .map(|row| {
-            row.iter()
-                .take(row.len() - 1)
-                .map(|s| s.parse::<usize>().unwrap())
-                .collect::<Vec<usize>>()
+        .filter_map(|row| {
+            let (_, rest) = row.split_last()?;
+            Some(rest.iter().filter_map(|s| s.parse().ok()).collect())
         })
         .collect::<Vec<Vec<usize>>>();
 
     let ops = flipped_work_sheet
         .iter()
-        .map(|row| row.last().unwrap().clone())
-        .collect::<Vec<String>>();
+        .filter_map(|row| row.last().map(|s| s.as_str()))
+        .collect::<Vec<&str>>();
 
     calculate_value(&values, &ops)
 }
@@ -94,7 +87,8 @@ pub fn calculate_work_sheet_with_most_significant_digits(work_sheet: &[Vec<char>
                 .iter()
                 .map(|row| {
                     row.iter()
-                        .fold(0, |acc, x| acc * 10 + x.to_digit(10).unwrap_or(0) as usize)
+                        .filter_map(|&c| c.to_digit(10))
+                        .fold(0, |acc, x| acc * 10 + x as usize)
                 })
                 .collect::<Vec<usize>>()
         })
@@ -102,8 +96,12 @@ pub fn calculate_work_sheet_with_most_significant_digits(work_sheet: &[Vec<char>
 
     let ops = grouped
         .iter()
-        .map(|(op, _)| op.to_string())
-        .collect::<Vec<String>>();
+        .map(|(op, _)| match op {
+            '*' => "*",
+            '+' => "+",
+            _ => "",
+        })
+        .collect::<Vec<&str>>();
 
     calculate_value(&values, &ops)
 }
