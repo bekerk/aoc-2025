@@ -31,7 +31,7 @@ pub fn is_invalid_id(id: usize) -> bool {
         return id / 10_usize.pow(len / 2) == id % 10_usize.pow(len / 2);
     }
 
-    return false;
+    false
 }
 
 pub fn is_invalid_id_v2(id: usize) -> bool {

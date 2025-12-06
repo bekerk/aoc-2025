@@ -24,10 +24,11 @@ pub fn get_safe_positions(grid: &[Vec<char>]) -> Vec<(usize, usize)> {
             let mut surrounding_rolls_count = 0;
             for (dx, dy) in &NEIGHBOURS {
                 if let (Some(nx), Some(ny)) = (x.checked_add_signed(*dx), y.checked_add_signed(*dy))
+                    && nx < max_x
+                    && ny < max_y
+                    && grid[ny][nx] == '@'
                 {
-                    if nx < max_x && ny < max_y && grid[ny][nx] == '@' {
-                        surrounding_rolls_count += 1;
-                    }
+                    surrounding_rolls_count += 1;
                 }
             }
             if surrounding_rolls_count < 4 {

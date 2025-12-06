@@ -12,16 +12,16 @@ pub fn maximum_possible_joltage(batteries: &[usize]) -> usize {
     let len = batteries.len();
     let (mut x, mut x_pos, mut y) = (0, 0, 0);
 
-    for i in 0..len - 1 {
-        if batteries[i] > x {
-            x = batteries[i];
+    for (i, &battery) in batteries.iter().enumerate().take(len - 1) {
+        if battery > x {
+            x = battery;
             x_pos = i;
         }
     }
 
-    for i in x_pos + 1..len {
-        if batteries[i] > y {
-            y = batteries[i];
+    for &battery in batteries.iter().skip(x_pos + 1) {
+        if battery > y {
+            y = battery;
         }
     }
 

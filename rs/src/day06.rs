@@ -3,16 +3,15 @@
 
 use std::iter::zip;
 
-pub fn flip_grid<T: Clone>(grid: &Vec<Vec<T>>) -> Vec<Vec<T>> {
+pub fn flip_grid<T: Clone>(grid: &[Vec<T>]) -> Vec<Vec<T>> {
     let mut result = Vec::new();
-    let num_rows = grid.len();
     let num_cols = grid.iter().map(|row| row.len()).max().unwrap_or(0);
 
     for col in 0..num_cols {
         let mut stack = Vec::new();
-        for row in 0..num_rows {
-            if col < grid[row].len() {
-                stack.push(grid[row][col].clone());
+        for item in grid.iter() {
+            if col < item.len() {
+                stack.push(item[col].clone());
             }
         }
         result.push(stack);
@@ -21,33 +20,50 @@ pub fn flip_grid<T: Clone>(grid: &Vec<Vec<T>>) -> Vec<Vec<T>> {
     result
 }
 
-pub fn calculate_value(values: &Vec<Vec<usize>>, ops: &[String]) -> usize {
+pub fn calculate_value(values: &[Vec<usize>], ops: &[String]) -> usize {
     zip(values, ops)
         .map(|(values, op)| match op.as_str() {
-            "*" => {
-                let result = values.iter().fold(1, |acc, x| acc * x);
-                println!("for values {:?} * x: {:?}", values, result);
-                result
-            }
-            "+" => {
-                let result = values.iter().sum::<usize>();
-                println!("for values {:?} + x: {:?}", values, result);
-                result
-            }
+            "*" => values.iter().product(),
+            "+" => values.iter().sum(),
             _ => 0,
         })
         .sum()
 }
 
-pub fn split_into_digits(value: usize) -> Vec<usize> {
-    value
-        .to_string()
-        .chars()
-        .map(|c| c.to_digit(10).unwrap() as usize)
-        .collect::<Vec<usize>>()
+pub fn group_by_op(work_sheet: &[Vec<char>]) -> Vec<(char, Vec<Vec<char>>)> {
+    let flipped = flip_grid(work_sheet);
+    let mut grouped: Vec<(char, Vec<Vec<char>>)> = Vec::new();
+    let mut current_group: Vec<Vec<char>> = Vec::new();
+    let mut current_op: char = ' ';
+
+    for mut row in flipped {
+        let is_empty = row.iter().all(|&c| c == ' ');
+        let sign = row.iter().find(|&&c| c == '*' || c == '+').copied();
+        row.retain(|&c| c != ' ');
+
+        if let Some(sign) = sign {
+            current_op = sign;
+            row.retain(|&c| c != current_op);
+        }
+
+        if is_empty {
+            if !current_group.is_empty() {
+                grouped.push((current_op, current_group));
+                current_group = Vec::new();
+            }
+        } else {
+            current_group.push(row);
+        }
+    }
+
+    if !current_group.is_empty() {
+        grouped.push((current_op, current_group));
+    }
+
+    grouped
 }
 
-pub fn calculate_work_sheet(work_sheet: &Vec<Vec<String>>) -> usize {
+pub fn calculate_work_sheet(work_sheet: &[Vec<String>]) -> usize {
     let flipped_work_sheet = flip_grid(work_sheet);
 
     let values = flipped_work_sheet
@@ -68,32 +84,25 @@ pub fn calculate_work_sheet(work_sheet: &Vec<Vec<String>>) -> usize {
     calculate_value(&values, &ops)
 }
 
-pub fn calculate_work_sheet_with_most_significant_digits(work_sheet: &Vec<Vec<String>>) -> usize {
-    let flipped = flip_grid(work_sheet);
+pub fn calculate_work_sheet_with_most_significant_digits(work_sheet: &[Vec<char>]) -> usize {
+    let grouped = group_by_op(work_sheet);
 
-    let values: Vec<Vec<usize>> = flipped
+    let values = grouped
         .iter()
-        .map(|row| {
-            let nums: Vec<usize> = row[..row.len() - 1]
+        .map(|(_, group)| {
+            group
                 .iter()
-                .map(|s| s.parse().unwrap())
-                .collect();
-
-            let digits: Vec<Vec<_>> = nums
-                .iter()
-                .map(|&v| split_into_digits(v).into_iter().rev().collect())
-                .collect();
-
-            flip_grid(&digits)
-                .iter()
-                .map(|d| d.iter().fold(0, |acc, x| acc * 10 + x))
-                .collect()
+                .map(|row| {
+                    row.iter()
+                        .fold(0, |acc, x| acc * 10 + x.to_digit(10).unwrap_or(0) as usize)
+                })
+                .collect::<Vec<usize>>()
         })
-        .collect();
+        .collect::<Vec<Vec<usize>>>();
 
-    let ops = flipped
+    let ops = grouped
         .iter()
-        .map(|row| row.last().unwrap().clone())
+        .map(|(op, _)| op.to_string())
         .collect::<Vec<String>>();
 
     calculate_value(&values, &ops)
@@ -117,18 +126,27 @@ mod test {
             .collect::<Vec<Vec<String>>>()
     }
 
+    fn file_to_vec_with_whitespace(file: &str) -> Vec<Vec<char>> {
+        fs::read_to_string(file)
+            .unwrap()
+            .trim()
+            .split('\n')
+            .map(|s| s.chars().collect::<Vec<char>>())
+            .collect::<Vec<Vec<char>>>()
+    }
+
     #[test]
     fn test_calculate_work_sheet() {
         let input = file_to_vec("../input/day06.txt");
-        assert_eq!(super::calculate_work_sheet(&input), 4277556);
+        assert_eq!(super::calculate_work_sheet(&input), 6957525317641);
     }
 
     #[test]
     fn test_calculate_work_sheet_with_most_significant_digits() {
-        let input = file_to_vec("../input/day06.txt");
+        let input = file_to_vec_with_whitespace("../input/day06.txt");
         assert_eq!(
             super::calculate_work_sheet_with_most_significant_digits(&input),
-            3263827
+            13215665360076
         );
     }
 }
