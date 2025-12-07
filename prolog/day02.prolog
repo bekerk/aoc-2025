@@ -29,11 +29,25 @@ sum_invalid_in_range(Token, Sum) :-
 
 % --- end part 1 ---
 
+% --- part 2: sum invalid IDs in range V2 ---
+
+sum_invalid_in_range_v2(Token, Sum) :-
+    parse_range(Token, Range),
+    maplist(number_string, Range, RangeStrs),
+    include(even_digit_count, Range, EvenDigitNums),
+    include(invalid_id, EvenDigitNums, InvalidIds),
+    sum_list(InvalidIds, Sum).
+
+% --- end part 2 ---
+
 run(Input) :-
     split_string(Input, ",", "", Tokens),
-    maplist(sum_invalid_in_range, Tokens, Sums),
-    sum_list(Sums, Total),
-    format("Day 2 Part 1: ~w~n", [Total]).
+    maplist(sum_invalid_in_range, Tokens, Part1Sums),
+    maplist(sum_invalid_in_range_v2, Tokens, Part2Sums),
+    sum_list(Part1Sums, Part1),
+    sum_list(Part2Sums, Part2),
+    format("Day 2 Part 1: ~w~n", [Part1]),
+    format("Day 2 Part 2: ~w~n", [Part2]).
 
 run :-
     read_file_to_string("../input/day02.txt", Input, []),
