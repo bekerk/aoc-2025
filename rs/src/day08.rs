@@ -2,7 +2,6 @@
 // https://adventofcode.com/2025/day/8
 
 use itertools::Itertools;
-use petgraph::algo::{connected_components, has_path_connecting};
 use petgraph::graph::{NodeIndex, UnGraph};
 use petgraph::unionfind::UnionFind;
 use petgraph::visit::Dfs;
@@ -59,41 +58,18 @@ pub fn create_graph(
     connect_limit: usize,
 ) -> UnGraph<Coordinate, usize> {
     let (mut graph, coordinate_to_node) = init_graph(input);
+    let mut uf = UnionFind::<NodeIndex>::new(input.len());
 
     for ((coord1, coord2), _) in sorted_pairs.iter().take(connect_limit) {
         let node1 = coordinate_to_node[coord1];
         let node2 = coordinate_to_node[coord2];
 
-        if !has_path_connecting(&graph, node1, node2, None) {
+        if uf.union(node1, node2) {
             graph.add_edge(node1, node2, 0);
         }
     }
 
     graph
-}
-
-pub fn create_connected_graph(
-    input: &[Coordinate],
-    sorted_pairs: &[((Coordinate, Coordinate), usize)],
-) -> (UnGraph<Coordinate, usize>, Option<(Coordinate, Coordinate)>) {
-    let (mut graph, coordinate_to_node) = init_graph(input);
-    let mut last_edge = None;
-
-    for ((coord1, coord2), _) in sorted_pairs {
-        let node1 = coordinate_to_node[coord1];
-        let node2 = coordinate_to_node[coord2];
-
-        if !has_path_connecting(&graph, node1, node2, None) {
-            last_edge = Some((*coord1, *coord2));
-            graph.add_edge(node1, node2, 0);
-
-            if connected_components(&graph) == 1 {
-                break;
-            }
-        }
-    }
-
-    (graph, last_edge)
 }
 
 pub fn create_connected_graph_with_union_find(
@@ -198,17 +174,6 @@ mod tests {
             super::product_of_lengths_of_connected_components(&components, 3),
             90036
         );
-    }
-
-    #[test]
-    fn test_two_last_nodes_to_make_graph_connected() {
-        let input = file_to_vec("../input/day08.txt");
-        let sorted_pairs = super::create_sorted_pairs(&input);
-        let (_graph, last_edge) = super::create_connected_graph(&input, &sorted_pairs);
-
-        if let Some((coord1, coord2)) = last_edge {
-            assert_eq!(coord1.x * coord2.x, 6083499488);
-        }
     }
 
     #[test]
