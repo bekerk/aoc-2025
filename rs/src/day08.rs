@@ -4,6 +4,7 @@
 use itertools::Itertools;
 use petgraph::algo::{connected_components, has_path_connecting};
 use petgraph::graph::{NodeIndex, UnGraph};
+use petgraph::unionfind::UnionFind;
 use petgraph::visit::Dfs;
 use std::collections::{HashMap, HashSet};
 
@@ -95,6 +96,34 @@ pub fn create_connected_graph(
     (graph, last_edge)
 }
 
+pub fn create_connected_graph_with_union_find(
+    input: &[Coordinate],
+    sorted_pairs: &[((Coordinate, Coordinate), usize)],
+) -> (UnGraph<Coordinate, usize>, Option<(Coordinate, Coordinate)>) {
+    let (mut graph, coordinate_to_node) = init_graph(input);
+    let mut uf = UnionFind::<NodeIndex>::new(input.len());
+    let mut last_edge = None;
+    let mut num_components = input.len();
+
+    for ((coord1, coord2), _) in sorted_pairs {
+        let node1 = coordinate_to_node[coord1];
+        let node2 = coordinate_to_node[coord2];
+
+        if uf.union(node1, node2) {
+            last_edge = Some((*coord1, *coord2));
+            graph.add_edge(node1, node2, 0);
+
+            num_components -= 1;
+
+            if num_components == 1 {
+                break;
+            }
+        }
+    }
+
+    (graph, last_edge)
+}
+
 pub fn get_idxs_of_connected_components(graph: &UnGraph<Coordinate, usize>) -> Vec<Vec<NodeIndex>> {
     let mut visited: HashSet<NodeIndex> = HashSet::new();
     let mut components: Vec<Vec<NodeIndex>> = Vec::new();
@@ -176,6 +205,18 @@ mod tests {
         let input = file_to_vec("../input/day08.txt");
         let sorted_pairs = super::create_sorted_pairs(&input);
         let (_graph, last_edge) = super::create_connected_graph(&input, &sorted_pairs);
+
+        if let Some((coord1, coord2)) = last_edge {
+            assert_eq!(coord1.x * coord2.x, 6083499488);
+        }
+    }
+
+    #[test]
+    fn test_union_find() {
+        let input = file_to_vec("../input/day08.txt");
+        let sorted_pairs = super::create_sorted_pairs(&input);
+        let (_graph, last_edge) =
+            super::create_connected_graph_with_union_find(&input, &sorted_pairs);
 
         if let Some((coord1, coord2)) = last_edge {
             assert_eq!(coord1.x * coord2.x, 6083499488);
