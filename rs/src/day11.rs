@@ -19,6 +19,7 @@ pub fn dfs_paths_count(map: &HashMap<usize, Vec<usize>>, node: usize, end: usize
     count
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn dfs_memoized_with_conditions(
     map: &HashMap<usize, Vec<usize>>,
     memo: &mut HashMap<(usize, bool, bool), usize>,
