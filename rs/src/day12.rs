@@ -1,3 +1,7 @@
+// --- Day 12: ??? ---
+// https://adventofcode.com/2025/day/12
+// FINAL DAY!!!!
+
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;
