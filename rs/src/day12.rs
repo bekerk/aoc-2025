@@ -2,6 +2,32 @@
 // https://adventofcode.com/2025/day/12
 // FINAL DAY!!!!
 
+pub fn regions_fit_in_shapes(
+    regions: &((usize, usize), Vec<usize>),
+    shapes: &[Vec<Vec<char>>],
+) -> bool {
+    let (width, height) = regions.0;
+    let total_present_size: f64 = regions
+        .1
+        .iter()
+        .enumerate()
+        .map(|(index, quantity)| {
+            let present_size = shapes[index]
+                .iter()
+                .flatten()
+                .filter(|&&c| c == '#')
+                .count();
+
+            quantity * present_size
+        })
+        .sum::<usize>() as f64;
+
+    let total_grid_size = (width * height) as f64;
+
+    // l o l
+    total_present_size < total_grid_size
+}
+
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;
@@ -37,10 +63,14 @@ mod tests {
     }
 
     #[test]
-    fn hello_world() {
+    fn test_regions_fit_in_shapes() {
         let (regions, shapes) = file_to_vec("../input/day12.txt");
 
-        println!("Regions: {:?}", regions);
-        println!("Shapes: {:?}", shapes);
+        let count = regions
+            .iter()
+            .filter(|region| super::regions_fit_in_shapes(*region, &shapes))
+            .count();
+
+        assert_eq!(count, 437);
     }
 }
